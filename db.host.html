@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIND9 DNS Records - host.domain</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .stat {
+            background: #f5f5f5;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .stat strong {
+            color: #667eea;
+        }
+        .records-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .section-title {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        .records-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        .record-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            background: #fff;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .record-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+        .record-hostname {
+            font-weight: 600;
+            color: #333;
+            word-break: break-all;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .record-type {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            width: fit-content;
+        }
+        .record-value {
+            color: #666;
+            font-family: "Courier New", monospace;
+            font-size: 13px;
+            margin-bottom: 10px;
+            word-break: break-all;
+            flex-grow: 1;
+        }
+        .record-comment {
+            color: #888;
+            font-style: italic;
+            font-size: 12px;
+            margin-bottom: 8px;
+            padding: 4px 8px;
+            background: #f8f9fa;
+            border-radius: 3px;
+            border-left: 3px solid #ddd;
+        }
+        .record-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .record-protocols {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .record-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #6f66ea;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 10px;
+            background: #f5f7ff;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            align-self: flex-start;
+        }
+        .area-separator {
+            border-color: #ffca28;
+            background: #fff8e1;
+            grid-column: 1 / -1;
+        }
+        .area-separator .record-hostname {
+            color: #b78103;
+        }
+        .record-link:hover {
+            background: #667eea;
+            color: white;
+        }
+        .record-link-button {
+            border: none;
+            cursor: pointer;
+            background: #f5f7ff;
+            color: #667eea;
+        }
+        .record-link-button:hover {
+            background: #667eea;
+            color: white;
+        }
+        .protocol-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            color: white;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 8px;
+            background: linear-gradient(135deg, #89e73cad 50%, #0bdecb5c 100%);
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+        .protocol-link:hover {
+            background: linear-gradient(135deg, #89e73cad 0%, #0bdecb5c 100%);
+            transform: scale(1.05);
+        }
+        .protocol-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            color: #666;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 8px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            border: 1px dashed #ccc;
+        }
+        .a-record .record-type {
+            background: #28a745;
+        }
+        .a-record .record-link {
+            color: #28a745;
+        }
+        .a-record .record-link:hover {
+            background: #28a745;
+            color: white;
+        }
+        .cname-record .record-type {
+            background: #007bff;
+        }
+        .cname-record .record-link {
+            color: #007bff;
+        }
+        .cname-record .record-link:hover {
+            background: #007bff;
+            color: white;
+        }
+        .empty-message {
+            padding: 40px 20px;
+            text-align: center;
+            color: #999;
+        }
+        .footer {
+            text-align: center;
+            color: white;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 BIND9 DNS Records</h1>
+            <p><strong>Zone:</strong> host.domain</p>
+            <div class="stats">
+                <div class="stat"><strong>5</strong> A Records</div>
+                <div class="stat"><strong>2</strong> CNAME Records</div>
+                <div class="stat"><strong>7</strong> Total Records</div>
+            </div>
+        </div>
+        <div class="records-section">
+            <div class="section-title">Parsed Records (7)</div>
+            <div class="records-grid">
+                <div class="record-card area-separator">
+                    <div class="record-hostname">Infrastructure</div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">router.host.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.10.1</div><div class="record-comment">Gateway</div>
+                    <div class="record-actions">
+                        <a href="http://router.host.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://router.host.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://router.host.domain', 'http://router.host.domain')" class="record-link record-link-button">Visit</button>
+                    </div>
+                </div>
+                <div class="record-card cname-record">
+                    <div class="record-hostname">router-ip.host.domain</div>
+                    <span class="record-type">CNAME</span>
+                    <div class="record-value">→ router.host.domain</div><div class="record-comment">Gateway secondary name</div>
+                    <div class="record-actions">
+                        <a href="http://router-ip.host.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://router-ip.host.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://router-ip.host.domain', 'http://router-ip.host.domain')" class="record-link record-link-button">Visit</button>
+                    </div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">vc.host.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.10.2</div><div class="record-comment">WiFi Virtual Controller port:4343</div>
+                    <div class="record-actions">
+                        <a href="http://vc.host.domain:4343" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://vc.host.domain:4343" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://vc.host.domain:4343', 'http://vc.host.domain:4343')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:vc.host.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card cname-record">
+                    <div class="record-hostname">WiFi.host.domain</div>
+                    <span class="record-type">CNAME</span>
+                    <div class="record-value">→ vc.host.domain</div><div class="record-comment">WiFi Virtual Controller port:4343</div>
+                    <div class="record-actions">
+                        <a href="http://WiFi.host.domain:4343" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://WiFi.host.domain:4343" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://WiFi.host.domain:4343', 'http://WiFi.host.domain:4343')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:WiFi.host.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">switch.host.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.10.3</div><div class="record-comment">switch</div>
+                    <div class="record-actions">
+                        <a href="http://switch.host.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://switch.host.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://switch.host.domain', 'http://switch.host.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:switch.host.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card area-separator">
+                    <div class="record-hostname">Local servers</div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">server1.host.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.10.10</div><div class="record-comment">DNS 1</div>
+                    <div class="record-actions">
+                        <a href="http://server1.host.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://server1.host.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://server1.host.domain', 'http://server1.host.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:server1.host.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">server2.host.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.10.11</div><div class="record-comment">DNS 2</div>
+                    <div class="record-actions">
+                        <a href="http://server2.host.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://server2.host.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://server2.host.domain', 'http://server2.host.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:server2.host.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <p>Generated on 2026-05-08 08:22:28 | BIND9 DNS Record Viewer</p>
+        </div>
+    </div>
+    <script>
+        function openPreferred(urlHttps, urlHttp) {
+            var win = window.open("", "_blank");
+            if (!win) {
+                return;
+            }
+
+            var opened = false;
+            var img = new Image();
+
+            function navigate(url) {
+                if (opened || win.closed) {
+                    return;
+                }
+                opened = true;
+                win.location = url;
+            }
+
+            img.onload = function() {
+                navigate(urlHttps);
+            };
+            img.onerror = function() {
+                navigate(urlHttp);
+            };
+            img.src = urlHttps;
+
+            setTimeout(function() {
+                navigate(urlHttp);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

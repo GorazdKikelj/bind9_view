@@ -1,0 +1,25 @@
+$ORIGIN .
+$TTL 604800     ; 1 week
+home.domain             IN SOA  nameserver.host.domain. gorazd.kikelj.host.domain. (
+                                2026050701 ; serial
+                                604800     ; refresh (1 week)
+                                86400      ; retry (1 day)
+                                2419200    ; expire (4 weeks)
+                                604800     ; minimum (1 week)
+                                )
+                        IN NS   server1.host.domain.
+                        IN NS   server2.home.domain.
+$ORIGIN host.domain.
+;--- START
+; Infrastructure
+;--- END
+router                  IN A    192.168.10.1    ; Gateway
+router-ip               IN CNAME        router  ; Gateway secondary name
+vc                      IN A    192.168.10.2    ; WiFi Virtual Controller port:4343 proto=[ssh]
+WiFi                    IN CNAME        vc      ; WiFi Virtual Controller port:4343 proto=[ssh]
+switch                  IN A    192.168.10.3    ; switch proto=[ssh]
+;--- START
+; Local servers
+;--- END
+server1                 IN A    192.168.10.10   ; DNS 1 proto=[ssh]
+server2                 IN A    192.168.10.11   ; DNS 2 proto=[ssh]
