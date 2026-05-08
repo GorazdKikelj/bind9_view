@@ -1,0 +1,57 @@
+$ORIGIN .
+$TTL 604800     ; 1 week
+home.domain             IN SOA  jagoda.home.domain. gorazd.kikelj.home.domain. (
+                                2026050701 ; serial
+                                604800     ; refresh (1 week)
+                                86400      ; retry (1 day)
+                                2419200    ; expire (4 weeks)
+                                604800     ; minimum (1 week)
+                                )
+                        IN NS   oman-pi.home.domain.
+                        IN NS   malina.home.domain.
+                        IN NS   jagoda.home.domain.
+                        IN NS   rpi-ubuntu-01.home.domain.
+                        IN NS   robida.home.domain.
+$ORIGIN home.domain.
+;--- START
+; Infrastructure
+;--- END
+router                  IN A    192.168.0.1     ; Gateway
+ocg-218m                IN CNAME        router  ; Gateway old name
+vc                      IN A    192.168.0.2     ; WiFi Virtual Controller port:4343 proto=[ssh]
+pusce-home              IN CNAME        vc      ; WiFi Virtual Controller port:4343 proto=[ssh]
+aruba-2930f             IN A    192.168.0.4     ; PoE switch, DHCP server proto=[ssh]
+hpe1820-24g             IN A    192.168.0.5     ; Distribution
+hpe1820-8g              IN A    192.168.0.6     ; Maj switch
+;--- START
+; Demo servers for ClearPass, AirWave,... 
+;--- END
+clearpass-vm            IN A    192.168.0.8     ; demo ClearPass server - decommisioned
+amp-vm                  IN A    192.168.0.9     ; demo AirWave server - decommisioned
+rt-ac68u                IN A    192.168.0.10    ; NAS servers
+eve-vm                  IN A    192.168.0.11    ; EVE-NG local simulator decomissioned
+;--- START
+; OpenVMS System
+;--- END
+ds10l                   IN A    192.168.0.15    ; Alpha DS10 proto=[ssh]
+repuh                   IN A    192.168.0.17    ; VAX simulator on repuh-pi proto=[telnet]
+pi                      IN A    192.168.0.18    ; VAX simulator on rpi-ubuntu-01 proto=[telnet]
+oman                    IN A    192.168.0.19    ; VAX simulator on oman-pi proto=[telnet]
+aster                   IN A    192.168.0.25    ; VAX simulator - lost
+;--- START
+; Raspbery Pi servers
+;--- END
+malina                  IN A    192.168.0.30    ; RPI-5 Secondary DNS proto=[ssh]
+oman-pi                 IN A    192.168.0.31    ; RPI-3 proto=[ssh]
+pi-pi                   IN A    192.168.0.32    ; proto=[telnet]
+repuh-pi                IN A    192.168.0.33    ; RPI-3 proto=[ssh]
+rpi-ubuntu-02           IN A    192.168.0.34    ; lost
+rpi-ubuntu-01           IN A    192.168.0.35    ; RPI-3 proto=[ssh]
+robida                  IN A    192.168.0.36    ; RPI-4 Terciary DNS proto=[ssh]
+jagoda                  IN A    192.168.0.37    ; RPI-5 Primary DNS proto=[ssh]
+db                      IN A    192.168.0.40    ; VRRP jagoda-malina proto=[ssh]
+;--- START
+; Aruba CX4100i new main switch
+;--- END
+a4100i                  IN A    192.168.0.75    ; Aruba CX4100i proto=[ssh]
+maj-pi                  IN A    192.168.0.240

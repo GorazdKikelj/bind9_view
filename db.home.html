@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIND9 DNS Records - home.domain</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .stat {
+            background: #f5f5f5;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .stat strong {
+            color: #667eea;
+        }
+        .records-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .section-title {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        .records-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        .record-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            background: #fff;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .record-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+        .record-hostname {
+            font-weight: 600;
+            color: #333;
+            word-break: break-all;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .record-type {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            width: fit-content;
+        }
+        .record-value {
+            color: #666;
+            font-family: "Courier New", monospace;
+            font-size: 13px;
+            margin-bottom: 10px;
+            word-break: break-all;
+            flex-grow: 1;
+        }
+        .record-comment {
+            color: #888;
+            font-style: italic;
+            font-size: 12px;
+            margin-bottom: 8px;
+            padding: 4px 8px;
+            background: #f8f9fa;
+            border-radius: 3px;
+            border-left: 3px solid #ddd;
+        }
+        .record-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .record-protocols {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .record-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #6f66ea;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 10px;
+            background: #f5f7ff;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            align-self: flex-start;
+        }
+        .area-separator {
+            border-color: #ffca28;
+            background: #fff8e1;
+            grid-column: 1 / -1;
+        }
+        .area-separator .record-hostname {
+            color: #b78103;
+        }
+        .record-link:hover {
+            background: #667eea;
+            color: white;
+        }
+        .record-link-button {
+            border: none;
+            cursor: pointer;
+            background: #f5f7ff;
+            color: #667eea;
+        }
+        .record-link-button:hover {
+            background: #667eea;
+            color: white;
+        }
+        .protocol-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            color: white;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 8px;
+            background: linear-gradient(135deg, #89e73cad 50%, #0bdecb5c 100%);
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+        .protocol-link:hover {
+            background: linear-gradient(135deg, #89e73cad 0%, #0bdecb5c 100%);
+            transform: scale(1.05);
+        }
+        .protocol-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            color: #666;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 8px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            border: 1px dashed #ccc;
+        }
+        .a-record .record-type {
+            background: #28a745;
+        }
+        .a-record .record-link {
+            color: #28a745;
+        }
+        .a-record .record-link:hover {
+            background: #28a745;
+            color: white;
+        }
+        .cname-record .record-type {
+            background: #007bff;
+        }
+        .cname-record .record-link {
+            color: #007bff;
+        }
+        .cname-record .record-link:hover {
+            background: #007bff;
+            color: white;
+        }
+        .empty-message {
+            padding: 40px 20px;
+            text-align: center;
+            color: #999;
+        }
+        .footer {
+            text-align: center;
+            color: white;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 BIND9 DNS Records</h1>
+            <p><strong>Zone:</strong> home.domain</p>
+            <div class="stats">
+                <div class="stat"><strong>25</strong> A Records</div>
+                <div class="stat"><strong>2</strong> CNAME Records</div>
+                <div class="stat"><strong>27</strong> Total Records</div>
+            </div>
+        </div>
+        <div class="records-section">
+            <div class="section-title">Parsed Records (27)</div>
+            <div class="records-grid">
+                <div class="record-card area-separator">
+                    <div class="record-hostname">Infrastructure</div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">router.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.1</div><div class="record-comment">Gateway</div>
+                    <div class="record-actions">
+                        <a href="http://router.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://router.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://router.home.domain', 'http://router.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div>
+                </div>
+                <div class="record-card cname-record">
+                    <div class="record-hostname">ocg-218m.home.domain</div>
+                    <span class="record-type">CNAME</span>
+                    <div class="record-value">→ router.home.domain</div><div class="record-comment">Gateway old name</div>
+                    <div class="record-actions">
+                        <a href="http://ocg-218m.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://ocg-218m.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://ocg-218m.home.domain', 'http://ocg-218m.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">vc.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.2</div><div class="record-comment">WiFi Virtual Controller port:4343</div>
+                    <div class="record-actions">
+                        <a href="http://vc.home.domain:4343" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://vc.home.domain:4343" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://vc.home.domain:4343', 'http://vc.home.domain:4343')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:vc.home.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card cname-record">
+                    <div class="record-hostname">pusce-home.home.domain</div>
+                    <span class="record-type">CNAME</span>
+                    <div class="record-value">→ vc.home.domain</div><div class="record-comment">WiFi Virtual Controller port:4343</div>
+                    <div class="record-actions">
+                        <a href="http://pusce-home.home.domain:4343" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://pusce-home.home.domain:4343" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://pusce-home.home.domain:4343', 'http://pusce-home.home.domain:4343')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:pusce-home.home.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">aruba-2930f.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.4</div><div class="record-comment">PoE switch, DHCP server</div>
+                    <div class="record-actions">
+                        <a href="http://aruba-2930f.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://aruba-2930f.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://aruba-2930f.home.domain', 'http://aruba-2930f.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:aruba-2930f.home.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">hpe1820-24g.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.5</div><div class="record-comment">Distribution</div>
+                    <div class="record-actions">
+                        <a href="http://hpe1820-24g.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://hpe1820-24g.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://hpe1820-24g.home.domain', 'http://hpe1820-24g.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">hpe1820-8g.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.6</div><div class="record-comment">Maj switch</div>
+                    <div class="record-actions">
+                        <a href="http://hpe1820-8g.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://hpe1820-8g.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://hpe1820-8g.home.domain', 'http://hpe1820-8g.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div>
+                </div>
+                <div class="record-card area-separator">
+                    <div class="record-hostname">Demo servers for ClearPass, AirWave,...</div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">clearpass-vm.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.8</div><div class="record-comment">demo ClearPass server - decommisioned</div>
+                    <div class="record-actions">
+                        <a href="http://clearpass-vm.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://clearpass-vm.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://clearpass-vm.home.domain', 'http://clearpass-vm.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">amp-vm.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.9</div><div class="record-comment">demo AirWave server - decommisioned</div>
+                    <div class="record-actions">
+                        <a href="http://amp-vm.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://amp-vm.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://amp-vm.home.domain', 'http://amp-vm.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">rt-ac68u.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.10</div><div class="record-comment">NAS servers</div>
+                    <div class="record-actions">
+                        <a href="http://rt-ac68u.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://rt-ac68u.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://rt-ac68u.home.domain', 'http://rt-ac68u.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">eve-vm.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.11</div><div class="record-comment">EVE-NG local simulator decomissioned</div>
+                    <div class="record-actions">
+                        <a href="http://eve-vm.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://eve-vm.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://eve-vm.home.domain', 'http://eve-vm.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div>
+                </div>
+                <div class="record-card area-separator">
+                    <div class="record-hostname">OpenVMS System</div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">ds10l.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.15</div><div class="record-comment">Alpha DS10</div>
+                    <div class="record-actions">
+                        <a href="http://ds10l.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://ds10l.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://ds10l.home.domain', 'http://ds10l.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:ds10l.home.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">repuh.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.17</div><div class="record-comment">VAX simulator on repuh-pi</div>
+                    <div class="record-actions">
+                        <a href="http://repuh.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://repuh.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://repuh.home.domain', 'http://repuh.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="telnet:repuh.home.domain:23" target="_blank" class="record-link protocol-link">telnet</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">pi.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.18</div><div class="record-comment">VAX simulator on rpi-ubuntu-01</div>
+                    <div class="record-actions">
+                        <a href="http://pi.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://pi.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://pi.home.domain', 'http://pi.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="telnet:pi.home.domain:23" target="_blank" class="record-link protocol-link">telnet</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">oman.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.19</div><div class="record-comment">VAX simulator on oman-pi</div>
+                    <div class="record-actions">
+                        <a href="http://oman.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://oman.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://oman.home.domain', 'http://oman.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="telnet:oman.home.domain:23" target="_blank" class="record-link protocol-link">telnet</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">aster.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.25</div><div class="record-comment">VAX simulator - lost</div>
+                    <div class="record-actions">
+                        <a href="http://aster.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://aster.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://aster.home.domain', 'http://aster.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div>
+                </div>
+                <div class="record-card area-separator">
+                    <div class="record-hostname">Raspbery Pi servers</div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">malina.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.30</div><div class="record-comment">RPI-5 Secondary DNS</div>
+                    <div class="record-actions">
+                        <a href="http://malina.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://malina.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://malina.home.domain', 'http://malina.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:malina.home.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">oman-pi.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.31</div><div class="record-comment">RPI-3</div>
+                    <div class="record-actions">
+                        <a href="http://oman-pi.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://oman-pi.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://oman-pi.home.domain', 'http://oman-pi.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:oman-pi.home.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">pi-pi.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.32</div>
+                    <div class="record-actions">
+                        <a href="http://pi-pi.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://pi-pi.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://pi-pi.home.domain', 'http://pi-pi.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="telnet:pi-pi.home.domain:23" target="_blank" class="record-link protocol-link">telnet</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">repuh-pi.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.33</div><div class="record-comment">RPI-3</div>
+                    <div class="record-actions">
+                        <a href="http://repuh-pi.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://repuh-pi.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://repuh-pi.home.domain', 'http://repuh-pi.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:repuh-pi.home.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">rpi-ubuntu-02.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.34</div><div class="record-comment">lost</div>
+                    <div class="record-actions">
+                        <a href="http://rpi-ubuntu-02.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://rpi-ubuntu-02.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://rpi-ubuntu-02.home.domain', 'http://rpi-ubuntu-02.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">rpi-ubuntu-01.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.35</div><div class="record-comment">RPI-3</div>
+                    <div class="record-actions">
+                        <a href="http://rpi-ubuntu-01.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://rpi-ubuntu-01.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://rpi-ubuntu-01.home.domain', 'http://rpi-ubuntu-01.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:rpi-ubuntu-01.home.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">robida.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.36</div><div class="record-comment">RPI-4 Terciary DNS</div>
+                    <div class="record-actions">
+                        <a href="http://robida.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://robida.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://robida.home.domain', 'http://robida.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:robida.home.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">jagoda.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.37</div><div class="record-comment">RPI-5 Primary DNS</div>
+                    <div class="record-actions">
+                        <a href="http://jagoda.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://jagoda.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://jagoda.home.domain', 'http://jagoda.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:jagoda.home.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">db.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.40</div><div class="record-comment">VRRP jagoda-malina</div>
+                    <div class="record-actions">
+                        <a href="http://db.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://db.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://db.home.domain', 'http://db.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:db.home.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card area-separator">
+                    <div class="record-hostname">Aruba CX4100i new main switch</div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">a4100i.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.75</div><div class="record-comment">Aruba CX4100i</div>
+                    <div class="record-actions">
+                        <a href="http://a4100i.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://a4100i.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://a4100i.home.domain', 'http://a4100i.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div><div class="record-protocols"><a href="ssh:a4100i.home.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
+                </div>
+                <div class="record-card a-record">
+                    <div class="record-hostname">maj-pi.home.domain</div>
+                    <span class="record-type">A</span>
+                    <div class="record-value">192.168.0.240</div>
+                    <div class="record-actions">
+                        <a href="http://maj-pi.home.domain" target="_blank" class="record-link">HTTP</a>
+                        <a href="https://maj-pi.home.domain" target="_blank" class="record-link">HTTPS</a>
+                        <button type="button" onclick="openPreferred('https://maj-pi.home.domain', 'http://maj-pi.home.domain')" class="record-link record-link-button">Visit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <p>Generated on 2026-05-07 08:22:43 | BIND9 DNS Record Viewer</p>
+        </div>
+    </div>
+    <script>
+        function openPreferred(urlHttps, urlHttp) {
+            var win = window.open("", "_blank");
+            if (!win) {
+                return;
+            }
+
+            var opened = false;
+            var img = new Image();
+
+            function navigate(url) {
+                if (opened || win.closed) {
+                    return;
+                }
+                opened = true;
+                win.location = url;
+            }
+
+            img.onload = function() {
+                navigate(urlHttps);
+            };
+            img.onerror = function() {
+                navigate(urlHttp);
+            };
+            img.src = urlHttps;
+
+            setTimeout(function() {
+                navigate(urlHttp);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
