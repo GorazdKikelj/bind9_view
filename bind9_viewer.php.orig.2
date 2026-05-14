@@ -436,13 +436,10 @@ class BIND9Viewer
                 $http_link = 'http://' . $base_url . ($http_port != 80 ? ':' . $http_port : '');
                 $https_link = 'https://' . $base_url . ($https_port != 443 ? ':' . $https_port : '');
 
-                $js_https = str_replace("'", "\\'", $https_link);
-                $js_http = str_replace("'", "\\'", $http_link);
-
                 $html .= '<tr class="' . $class . '">
                     <td><span class="record-type">' . $type . '</span></td>
-                    <td class="hostname"><a href="#" class="hostname" onclick="openPreferred(\'' . $js_https . '\', \'' . $js_http . '\'); return false;">' . $name . '</a></td>
-                    <td class="value"><a href="#" class="value" onclick="openPreferred(\'' . $js_https . '\', \'' . $js_http . '\'); return false;">' . $value . '</a></td>
+                    <td class="hostname">' . $name . '</td>
+                    <td class="value">' . $value . '</td>
                     <td class="links">
                         <a href="' . $http_link . '" target="_blank" class="link">HTTP</a>
                         <a href="' . $https_link . '" target="_blank" class="link">HTTPS</a>';
@@ -479,37 +476,6 @@ class BIND9Viewer
             </tbody>
         </table>
     </div>
-    <script>
-        function openPreferred(urlHttps, urlHttp) {
-            var win = window.open("", "_blank");
-            if (!win) {
-                return;
-            }
-
-            var opened = false;
-            var img = new Image();
-
-            function navigate(url) {
-                if (opened || win.closed) {
-                    return;
-                }
-                opened = true;
-                win.location = url;
-            }
-
-            img.onload = function() {
-                navigate(urlHttps);
-            };
-            img.onerror = function() {
-                navigate(urlHttp);
-            };
-            img.src = urlHttps;
-
-            setTimeout(function() {
-                navigate(urlHttp);
-            }, 3000);
-        }
-    </script>
 </body>
 </html>';
 
