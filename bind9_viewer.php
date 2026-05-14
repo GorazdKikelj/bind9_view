@@ -350,7 +350,8 @@ class BIND9Viewer
 <body>
     <div class="container">
         <h1>BIND9 DNS Records - ' . htmlspecialchars($this->origin) . '</h1>
-        <table>
+        <div class="view-toggle"><a href="' . (isset($_GET['zone']) ? 'bind9_viewer.php?zone=' . urlencode($_GET['zone']) . '&origin=' . urlencode(isset($_GET['origin']) ? $_GET['origin'] : '') : '#') . '" class="view-link">Card View</a> | <a href="bind9_help.php" class="view-link">Help</a></div>
+         <table>
             <thead>
                 <tr>
                     <th>Type</th>
@@ -459,11 +460,13 @@ class BIND9Viewer
     <div class="container">
         <div class="header">
             <h1>🔗 BIND9 DNS Records</h1>
-            <p><strong>Zone:</strong> ' . htmlspecialchars($this->origin) . '</p>
+            <h2><strong>Zone:</strong> ' . htmlspecialchars($this->origin) . '</h2>
             <div class="stats">
                 <div class="stat"><strong>' . count($this->records['A']) . '</strong> A Records</div>
                 <div class="stat"><strong>' . count($this->records['CNAME']) . '</strong> CNAME Records</div>
                 <div class="stat"><strong>' . (count($this->records['A']) + count($this->records['CNAME'])) . '</strong> Total Records</div>
+                ' . (isset($_GET['zone']) ? '<div class="stat"><strong><a href="bind9_viewer.php?zone=' . urlencode($_GET['zone']) . '&origin=' . urlencode(isset($_GET['origin']) ? $_GET['origin'] : '') . '&list=true" class="view-link">List View</a></strong></div>' : '') . '
+                <div class="stat"><strong><a href="bind9_help.php" class="view-link">Help</a></strong></div>
             </div>
         </div>';
 
@@ -506,9 +509,11 @@ class BIND9Viewer
 
                 $html .= '
                 <div class="record-card ' . $cardClass . '">
-                    <div class="record-hostname">' . $name_display . '</div>
-                    <span class="record-type">' . $label . '</span>
-                    <div class="record-value">' . $value_text . '</div>';
+                    <div class="record-hostname">
+                    <button type="button" onclick="openPreferred(\'' . $https_link . '\', \'' . $http_link . '\')" class="record-link record-link-button">' . $value_text . '</button>
+                    <button type="button" onclick="openPreferred(\'' . $https_link . '\', \'' . $http_link . '\')" class="record-link record-link-button">' . $name_display . '</button>
+                    
+                    </div>';
 
                 if (!empty($comment)) {
                     $html .= '<div class="record-comment">' . htmlspecialchars($comment) . '</div>';
@@ -518,12 +523,11 @@ class BIND9Viewer
                     <div class="record-actions">
                         <a href="' . $http_link . '" target="_blank" class="record-link">HTTP</a>
                         <a href="' . $https_link . '" target="_blank" class="record-link">HTTPS</a>
-                        <button type="button" onclick="openPreferred(\'' . $https_link . '\', \'' . $http_link . '\')" class="record-link record-link-button">Visit</button>
-                    </div>';
+                    ';
 
                 if (!empty($protocols)) {
                     $port_map = $this->getPortMap();
-                    $html .= '<div class="record-protocols">';
+                    $html .= ' ';
                     foreach ($protocols as $proto) {
                         $proto_lower = strtolower(trim($proto));
                         $proto_display = htmlspecialchars($proto);
@@ -537,16 +541,15 @@ class BIND9Viewer
                                 #    $proto_link = strtolower($proto_lower) . '://' . $base_url . ':' . $proto_port;
                                 $proto_link = strtolower($proto_lower) . ':' . $base_url . ':' . $proto_port;
                             }
-                            #                            $html .= '<a href="' . htmlspecialchars($proto_link) . '" target="_blank" class="record-link protocol-link">' . $proto_display . '</a>';
-                            $html .= '<a href="' . $proto_link . '" target="_blank" class="record-link protocol-link">' . $proto_display . '</a>';
+                            #                            $html .= '<a href="' . htmlspecialchars($proto_link) . '" target="_blank" class="link protocol-link">' . $proto_display . '</a>';
+                            $html .= '<a href="' . $proto_link . '" target="_blank" class="link protocol-link">' . $proto_display . '</a>';
                         } else {
-                            $html .= '<span class="record-link protocol-label">' . $proto_display . '</span>';
+                            $html .= '<span class="link protocol-label">' . $proto_display . '</span>';
                         }
                     }
-                    $html .= '</div>';
                 }
 
-                $html .= '
+                $html .= '</div>
                 </div>';
             }
         } else {

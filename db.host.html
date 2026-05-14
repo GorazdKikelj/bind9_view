@@ -3,106 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BIND9 DNS Records - host.domain</title>
+    <title>BIND9 DNS Records List - host.domain</title>
     <link rel="stylesheet" href="bind9_viewer.css">
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🔗 BIND9 DNS Records</h1>
-            <p><strong>Zone:</strong> host.domain</p>
-            <div class="stats">
-                <div class="stat"><strong>5</strong> A Records</div>
-                <div class="stat"><strong>2</strong> CNAME Records</div>
-                <div class="stat"><strong>7</strong> Total Records</div>
-            </div>
-        </div>
-        <div class="records-section">
-            <div class="section-title">Parsed Records (7)</div>
-            <div class="records-grid">
-                <div class="record-card area-separator">
-                    <div class="record-hostname">Infrastructure</div>
-                </div>
-                <div class="record-card a-record">
-                    <div class="record-hostname">router.host.domain</div>
-                    <span class="record-type">A</span>
-                    <div class="record-value">192.168.10.1</div><div class="record-comment">Gateway</div>
-                    <div class="record-actions">
-                        <a href="http://router.host.domain" target="_blank" class="record-link">HTTP</a>
-                        <a href="https://router.host.domain" target="_blank" class="record-link">HTTPS</a>
-                        <button type="button" onclick="openPreferred('https://router.host.domain', 'http://router.host.domain')" class="record-link record-link-button">Visit</button>
-                    </div>
-                </div>
-                <div class="record-card cname-record">
-                    <div class="record-hostname">router-ip.host.domain</div>
-                    <span class="record-type">CNAME</span>
-                    <div class="record-value">→ router.host.domain</div><div class="record-comment">Gateway secondary name</div>
-                    <div class="record-actions">
-                        <a href="http://router-ip.host.domain" target="_blank" class="record-link">HTTP</a>
-                        <a href="https://router-ip.host.domain" target="_blank" class="record-link">HTTPS</a>
-                        <button type="button" onclick="openPreferred('https://router-ip.host.domain', 'http://router-ip.host.domain')" class="record-link record-link-button">Visit</button>
-                    </div>
-                </div>
-                <div class="record-card a-record">
-                    <div class="record-hostname">vc.host.domain</div>
-                    <span class="record-type">A</span>
-                    <div class="record-value">192.168.10.2</div><div class="record-comment">WiFi Virtual Controller port:4343</div>
-                    <div class="record-actions">
-                        <a href="http://vc.host.domain:4343" target="_blank" class="record-link">HTTP</a>
-                        <a href="https://vc.host.domain:4343" target="_blank" class="record-link">HTTPS</a>
-                        <button type="button" onclick="openPreferred('https://vc.host.domain:4343', 'http://vc.host.domain:4343')" class="record-link record-link-button">Visit</button>
-                    </div><div class="record-protocols"><a href="ssh:vc.host.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
-                </div>
-                <div class="record-card cname-record">
-                    <div class="record-hostname">WiFi.host.domain</div>
-                    <span class="record-type">CNAME</span>
-                    <div class="record-value">→ vc.host.domain</div><div class="record-comment">WiFi Virtual Controller port:4343</div>
-                    <div class="record-actions">
-                        <a href="http://WiFi.host.domain:4343" target="_blank" class="record-link">HTTP</a>
-                        <a href="https://WiFi.host.domain:4343" target="_blank" class="record-link">HTTPS</a>
-                        <button type="button" onclick="openPreferred('https://WiFi.host.domain:4343', 'http://WiFi.host.domain:4343')" class="record-link record-link-button">Visit</button>
-                    </div><div class="record-protocols"><a href="ssh:WiFi.host.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
-                </div>
-                <div class="record-card a-record">
-                    <div class="record-hostname">switch.host.domain</div>
-                    <span class="record-type">A</span>
-                    <div class="record-value">192.168.10.3</div><div class="record-comment">switch</div>
-                    <div class="record-actions">
-                        <a href="http://switch.host.domain" target="_blank" class="record-link">HTTP</a>
-                        <a href="https://switch.host.domain" target="_blank" class="record-link">HTTPS</a>
-                        <button type="button" onclick="openPreferred('https://switch.host.domain', 'http://switch.host.domain')" class="record-link record-link-button">Visit</button>
-                    </div><div class="record-protocols"><a href="ssh:switch.host.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
-                </div>
-                <div class="record-card area-separator">
-                    <div class="record-hostname">Local servers</div>
-                </div>
-                <div class="record-card a-record">
-                    <div class="record-hostname">server1.host.domain</div>
-                    <span class="record-type">A</span>
-                    <div class="record-value">192.168.10.10</div><div class="record-comment">DNS 1</div>
-                    <div class="record-actions">
-                        <a href="http://server1.host.domain" target="_blank" class="record-link">HTTP</a>
-                        <a href="https://server1.host.domain" target="_blank" class="record-link">HTTPS</a>
-                        <button type="button" onclick="openPreferred('https://server1.host.domain', 'http://server1.host.domain')" class="record-link record-link-button">Visit</button>
-                    </div><div class="record-protocols"><a href="ssh:server1.host.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
-                </div>
-                <div class="record-card a-record">
-                    <div class="record-hostname">server2.host.domain</div>
-                    <span class="record-type">A</span>
-                    <div class="record-value">192.168.10.11</div><div class="record-comment">DNS 2</div>
-                    <div class="record-actions">
-                        <a href="http://server2.host.domain" target="_blank" class="record-link">HTTP</a>
-                        <a href="https://server2.host.domain" target="_blank" class="record-link">HTTPS</a>
-                        <button type="button" onclick="openPreferred('https://server2.host.domain', 'http://server2.host.domain')" class="record-link record-link-button">Visit</button>
-                    </div><div class="record-protocols"><a href="ssh:server2.host.domain:22" target="_blank" class="record-link protocol-link">ssh</a></div>
-                </div>
-            </div>
-        </div>
-        <div class="footer">
-            <p>Generated on 2026-05-14 11:55:46 | BIND9 DNS Record Viewer</p>
-        </div>
-    </div>
-    <script>
+        <h1>BIND9 DNS Records - host.domain</h1>
+        <div class="view-toggle"><a href="#" class="view-link">Card View</a> | <a href="bind9_help.php" class="view-link">Help</a></div>
+         <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>IP Address</th>
+                    <th>Links</th>
+                    <th>Comment</th>
+                </tr>
+            </thead>
+            <tbody><tr class="area-section">
+                    <td colspan="5">Infrastructure</td>
+                </tr><tr class="a-record">
+                    <td><span class="record-type">A</span></td>
+                    <td class="hostname"><a href="#" class="hostname" onclick="openPreferred('https://router.host.domain', 'http://router.host.domain'); return false;">router.host.domain</a></td>
+                    <td class="value"><a href="#" class="value" onclick="openPreferred('https://router.host.domain', 'http://router.host.domain'); return false;">192.168.10.1</a></td>
+                    <td class="links">
+                        <a href="http://router.host.domain" target="_blank" class="link">HTTP</a>
+                        <a href="https://router.host.domain" target="_blank" class="link">HTTPS</a></td>
+                    <td class="comment">Gateway</td>
+                </tr><tr class="cname-record">
+                    <td><span class="record-type">CNAME</span></td>
+                    <td class="hostname"><a href="#" class="hostname" onclick="openPreferred('https://router-ip.host.domain', 'http://router-ip.host.domain'); return false;">router-ip.host.domain</a></td>
+                    <td class="value"><a href="#" class="value" onclick="openPreferred('https://router-ip.host.domain', 'http://router-ip.host.domain'); return false;">router.host.domain</a></td>
+                    <td class="links">
+                        <a href="http://router-ip.host.domain" target="_blank" class="link">HTTP</a>
+                        <a href="https://router-ip.host.domain" target="_blank" class="link">HTTPS</a></td>
+                    <td class="comment">Gateway secondary name</td>
+                </tr><tr class="a-record">
+                    <td><span class="record-type">A</span></td>
+                    <td class="hostname"><a href="#" class="hostname" onclick="openPreferred('https://vc.host.domain:4343', 'http://vc.host.domain:4343'); return false;">vc.host.domain</a></td>
+                    <td class="value"><a href="#" class="value" onclick="openPreferred('https://vc.host.domain:4343', 'http://vc.host.domain:4343'); return false;">192.168.10.2</a></td>
+                    <td class="links">
+                        <a href="http://vc.host.domain:4343" target="_blank" class="link">HTTP</a>
+                        <a href="https://vc.host.domain:4343" target="_blank" class="link">HTTPS</a><a href="ssh://vc.host.domain:22" target="_blank" class="link protocol-link">ssh</a></td>
+                    <td class="comment">WiFi Virtual Controller port:4343</td>
+                </tr><tr class="cname-record">
+                    <td><span class="record-type">CNAME</span></td>
+                    <td class="hostname"><a href="#" class="hostname" onclick="openPreferred('https://WiFi.host.domain:4343', 'http://WiFi.host.domain:4343'); return false;">WiFi.host.domain</a></td>
+                    <td class="value"><a href="#" class="value" onclick="openPreferred('https://WiFi.host.domain:4343', 'http://WiFi.host.domain:4343'); return false;">vc.host.domain</a></td>
+                    <td class="links">
+                        <a href="http://WiFi.host.domain:4343" target="_blank" class="link">HTTP</a>
+                        <a href="https://WiFi.host.domain:4343" target="_blank" class="link">HTTPS</a><a href="ssh://WiFi.host.domain:22" target="_blank" class="link protocol-link">ssh</a></td>
+                    <td class="comment">WiFi Virtual Controller port:4343</td>
+                </tr><tr class="a-record">
+                    <td><span class="record-type">A</span></td>
+                    <td class="hostname"><a href="#" class="hostname" onclick="openPreferred('https://switch.host.domain', 'http://switch.host.domain'); return false;">switch.host.domain</a></td>
+                    <td class="value"><a href="#" class="value" onclick="openPreferred('https://switch.host.domain', 'http://switch.host.domain'); return false;">192.168.10.3</a></td>
+                    <td class="links">
+                        <a href="http://switch.host.domain" target="_blank" class="link">HTTP</a>
+                        <a href="https://switch.host.domain" target="_blank" class="link">HTTPS</a><a href="ssh://switch.host.domain:22" target="_blank" class="link protocol-link">ssh</a></td>
+                    <td class="comment">switch</td>
+                </tr><tr class="area-section">
+                    <td colspan="5">Local servers</td>
+                </tr><tr class="a-record">
+                    <td><span class="record-type">A</span></td>
+                    <td class="hostname"><a href="#" class="hostname" onclick="openPreferred('https://server1.host.domain', 'http://server1.host.domain'); return false;">server1.host.domain</a></td>
+                    <td class="value"><a href="#" class="value" onclick="openPreferred('https://server1.host.domain', 'http://server1.host.domain'); return false;">192.168.10.10</a></td>
+                    <td class="links">
+                        <a href="http://server1.host.domain" target="_blank" class="link">HTTP</a>
+                        <a href="https://server1.host.domain" target="_blank" class="link">HTTPS</a><a href="ssh://server1.host.domain:22" target="_blank" class="link protocol-link">ssh</a></td>
+                    <td class="comment">DNS 1</td>
+                </tr><tr class="a-record">
+                    <td><span class="record-type">A</span></td>
+                    <td class="hostname"><a href="#" class="hostname" onclick="openPreferred('https://server2.host.domain', 'http://server2.host.domain'); return false;">server2.host.domain</a></td>
+                    <td class="value"><a href="#" class="value" onclick="openPreferred('https://server2.host.domain', 'http://server2.host.domain'); return false;">192.168.10.11</a></td>
+                    <td class="links">
+                        <a href="http://server2.host.domain" target="_blank" class="link">HTTP</a>
+                        <a href="https://server2.host.domain" target="_blank" class="link">HTTPS</a><a href="ssh://server2.host.domain:22" target="_blank" class="link protocol-link">ssh</a></td>
+                    <td class="comment">DNS 2</td>
+                </tr>
+            </tbody>
+        </table>
+    </div><script>
         function openPreferred(urlHttps, urlHttp) {
             var win = window.open("", "_blank");
             if (!win) {
