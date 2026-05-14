@@ -15,7 +15,7 @@
 - Adds clickable `HTTP`, `HTTPS`, and `Visit` buttons for each record
 - Adds protocol-specific links for supported protocols
 - Recognizes area separator blocks using `; --- START` / `; --- END`
-- Renders a responsive, styled HTML dashboard
+- Renders a responsive, styled HTML dashboard using external CSS from `bind9_viewer.css`
 - **NEW:** List mode with table layout (`list=true` parameter)
 - **NEW:** Section delimiters displayed as table headers in list mode
 
@@ -105,7 +105,7 @@ Example:
 php bind9_viewer.php /etc/bind/db.example.com example.com
 ```
 
-The script writes output to `PATH_FILENAME.html`, for example `db.example.html`.
+The script writes output to `PATH_FILENAME.html`, for example `db.example.html`. Use `list=true` to generate the compact table view.
 
 ### Web Mode
 
@@ -119,13 +119,17 @@ http://your-server/bind9_viewer.php?zone=/etc/bind/db.example.com&origin=example
 
 ### List Mode
 
-For a compact table view instead of the card layout, add the `list=true` parameter:
+For a compact table view instead of the card layout, add the `list=true` parameter in web mode or as the third CLI argument:
 
 ```text
 http://your-server/bind9_viewer.php?zone=/etc/bind/db.example.com&origin=example.com&list=true
 ```
 
-The list mode displays records in a table format with columns for Type, Name, Value, Links, and Comment. Section delimiters from the zone file are shown as highlighted table rows spanning all columns.
+```bash
+php bind9_viewer.php /etc/bind/db.example.com example.com list=true
+```
+
+The list mode displays records in a table format with columns for Type, Name, Value, Links, and Comment. Section delimiters from the zone file are shown as highlighted table rows spanning all columns. The generated HTML references `bind9_viewer.css` for styling.
 
 ## Output
 
