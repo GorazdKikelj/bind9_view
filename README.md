@@ -16,6 +16,8 @@
 - Adds protocol-specific links for supported protocols
 - Recognizes area separator blocks using `; --- START` / `; --- END`
 - Renders a responsive, styled HTML dashboard
+- **NEW:** List mode with table layout (`list=true` parameter)
+- **NEW:** Section delimiters displayed as table headers in list mode
 
 ## Requirements
 
@@ -115,7 +117,19 @@ Example:
 http://your-server/bind9_viewer.php?zone=/etc/bind/db.example.com&origin=example.com
 ```
 
+### List Mode
+
+For a compact table view instead of the card layout, add the `list=true` parameter:
+
+```text
+http://your-server/bind9_viewer.php?zone=/etc/bind/db.example.com&origin=example.com&list=true
+```
+
+The list mode displays records in a table format with columns for Type, Name, Value, Links, and Comment. Section delimiters from the zone file are shown as highlighted table rows spanning all columns.
+
 ## Output
+
+### Card Mode (Default)
 
 The generated HTML includes:
 
@@ -126,6 +140,16 @@ The generated HTML includes:
 - `HTTP`, `HTTPS`, and `Visit` buttons on each record card
 - Area separator cards for named comment blocks
 - Responsive styling for desktop and mobile
+
+### List Mode (`list=true`)
+
+The list mode provides a compact table view:
+
+- Table with columns: Type, Name, Value, Links, Comment
+- Section delimiters displayed as highlighted full-width rows
+- All protocol and port links preserved
+- Comments shown in dedicated column
+- Clean, minimal styling optimized for quick scanning
 
 ## Notes
 

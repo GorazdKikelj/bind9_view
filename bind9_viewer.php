@@ -271,12 +271,231 @@ class BIND9Viewer
     }
 
     /**
+     * Generate simple list HTML output
+     * 
+     * @return string HTML content
+     */
+    private function generateListHTML()
+    {
+        $html = '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIND9 DNS Records List - ' . htmlspecialchars($this->origin) . '</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .record-type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .a-record .record-type {
+            background: #28a745;
+            color: white;
+        }
+        .cname-record .record-type {
+            background: #007bff;
+            color: white;
+        }
+        .hostname {
+            font-weight: 500;
+            color: #333;
+        }
+        .value {
+            font-family: "Courier New", monospace;
+            color: #666;
+        }
+        .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 4px 8px;
+            background: #f0f4ff;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        .link:hover {
+            background: #667eea;
+            color: white;
+        }
+        .protocol-link {
+            background: linear-gradient(135deg, #89e73cad 50%, #0bdecb5c 100%);
+            color: white;
+        }
+        .protocol-link:hover {
+            background: linear-gradient(135deg, #89e73cad 0%, #0bdecb5c 100%);
+        }
+        .comment {
+            color: #888;
+            font-style: italic;
+            font-size: 13px;
+        }
+        .area-section {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        .area-section td {
+            padding: 15px;
+            font-weight: 600;
+            color: #856404;
+            text-align: center;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BIND9 DNS Records - ' . htmlspecialchars($this->origin) . '</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>IP Address</th>
+                    <th>Links</th>
+                    <th>Comment</th>
+                </tr>
+            </thead>
+            <tbody>';
+
+        $port_map = [
+            'ssh' => 22,
+            'telnet' => 23,
+            'http' => 80,
+            'https' => 443,
+            'ftp' => 21,
+            'sftp' => 22,
+            'smtp' => 25,
+            'pop3' => 110,
+            'imap' => 143,
+            'rdp' => 3389,
+            'vnc' => 5900,
+        ];
+
+        foreach ($this->items as $item) {
+            if ($item['type'] === 'record' && in_array($item['recordType'], ['A', 'CNAME'])) {
+                $name = htmlspecialchars($item['name']);
+                $value = htmlspecialchars($item['value']);
+                $type = $item['recordType'];
+                $class = strtolower($type) . '-record';
+                $port = $item['port'] ?? null;
+                $protocols = $item['protocols'] ?? [];
+                $comment = $item['comment'] ?? '';
+
+                // Build base URL for hostname
+                $base_url = $name;
+                $http_port = $port ?: 80;
+                $https_port = $port ?: 443;
+
+                $http_link = 'http://' . $base_url . ($http_port != 80 ? ':' . $http_port : '');
+                $https_link = 'https://' . $base_url . ($https_port != 443 ? ':' . $https_port : '');
+
+                $html .= '<tr class="' . $class . '">
+                    <td><span class="record-type">' . $type . '</span></td>
+                    <td class="hostname">' . $name . '</td>
+                    <td class="value">' . $value . '</td>
+                    <td class="links">
+                        <a href="' . $http_link . '" target="_blank" class="link">HTTP</a>
+                        <a href="' . $https_link . '" target="_blank" class="link">HTTPS</a>';
+
+                // Add protocol links
+                foreach ($protocols as $proto) {
+                    $proto_lower = strtolower(trim($proto));
+                    $proto_port = $port_map[$proto_lower] ?? $port ?? null;
+
+                    if ($proto_port) {
+                        if ($proto_lower === 'http' || $proto_lower === 'https') {
+                            $proto_link = ($proto_lower === 'https' ? 'https' : 'http') . '://' . $base_url . ($port ? ':' . $port : '');
+                        } else {
+                            $proto_link = $proto_lower . '://' . $base_url . ':' . $proto_port;
+                        }
+                        $html .= '<a href="' . $proto_link . '" target="_blank" class="link protocol-link">' . htmlspecialchars($proto) . '</a>';
+                    } else {
+                        $html .= '<span class="link protocol-link" style="cursor: default;">' . htmlspecialchars($proto) . '</span>';
+                    }
+                }
+
+                $html .= '</td>
+                    <td class="comment">' . htmlspecialchars($comment) . '</td>
+                </tr>';
+            } elseif ($item['type'] === 'area') {
+                $area_text = htmlspecialchars($item['text']);
+                $html .= '<tr class="area-section">
+                    <td colspan="5">' . $area_text . '</td>
+                </tr>';
+            }
+        }
+
+        $html .= '
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>';
+
+        return $html;
+    }
+
+    /**
      * Generate HTML output
      * 
      * @return string HTML content
      */
     public function generateHTML()
     {
+        // Check for list mode
+        $isListMode = isset($_GET['list']) && $_GET['list'] === 'true';
+
+        if ($isListMode) {
+            return $this->generateListHTML();
+        }
+       
         $html = '<!DOCTYPE html>
 <html>
 <head>
